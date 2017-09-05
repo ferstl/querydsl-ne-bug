@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestConfiguration.class)
-public class QueryDslNeBug {
+public class QueryDslNeBugTest {
 
   @Autowired
   private DataSource dataSource;
