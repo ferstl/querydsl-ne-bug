@@ -1,39 +1,38 @@
 package com.github.ferstl;
 
+import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import com.querydsl.sql.H2Templates;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 
-import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.H2;
+import static com.github.ferstl.QTableA.tableA;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = QueryDslNeBug.TestConfiguration.class)
+@ContextConfiguration(classes = TestConfiguration.class)
 public class QueryDslNeBug {
+
+  @Autowired
+  private JdbcOperations jdbcOperations;
 
   @Autowired
   private DataSource dataSource;
 
   @Test
-  public void test() {
-    System.out.println(dataSource);
-  }
+  public void test() throws SQLException {
+    H2Templates h2Templates = new H2Templates();
+    new com.querydsl.sql.Configuration(h2Templates);
+    SQLQuery<Object> query = new SQLQuery<>(this.dataSource.getConnection(), h2Templates);
 
-  @Configuration
-  static class TestConfiguration {
+    SQLQueryFactory queryFactory = new SQLQueryFactory(new com.querydsl.sql.Configuration(h2Templates), this.dataSource);
+    System.out.println(queryFactory.query().select(tableA.description).from(tableA).fetch());
 
-    @Bean
-    public DataSource dataSource() {
-      return new EmbeddedDatabaseBuilder()
-          .setType(H2)
-          .addDefaultScripts()
-          .build();
-    }
   }
 
 }
